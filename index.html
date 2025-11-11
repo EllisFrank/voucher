@@ -34,6 +34,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             line-height: 1.6;
+            -webkit-text-size-adjust: 100%; /* Prevent font scaling on iOS */
         }
 
         /* Intro Screen */
@@ -74,7 +75,7 @@
         .tagline {
             font-size: clamp(1rem, 4vw, 1.5rem);
             margin-bottom: 3rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         /* Animation Container */
@@ -214,9 +215,10 @@
             cursor: pointer;
             white-space: nowrap;
             transition: var(--transition);
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.9);
             min-width: 100px;
             font-size: clamp(0.8rem, 3vw, 1rem);
+            font-weight: 500;
         }
 
         .nav-tab.active {
@@ -406,11 +408,13 @@
             border: 1px solid var(--glass-border);
             min-width: 120px;
             font-size: clamp(0.8rem, 3vw, 1rem);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .event-type-btn.active {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             box-shadow: var(--neon-glow);
+            color: white;
         }
 
         /* Feature Chips */
@@ -425,6 +429,7 @@
             margin-bottom: 8px;
             font-size: clamp(0.7rem, 2.5vw, 0.875rem);
             border: 1px solid rgba(37, 99, 235, 0.3);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .chip-icon {
@@ -638,7 +643,7 @@
 
         .admin-table th {
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .action-buttons {
@@ -721,7 +726,7 @@
 
         .receipt-items th {
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .receipt-total {
@@ -848,6 +853,25 @@
             margin-top: 10px;
         }
 
+        /* Success and Error Messages */
+        .success-message {
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .error-message {
+            color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
         /* Responsive adjustments */
         @media (max-width: 1024px) {
             .animation-container {
@@ -921,6 +945,22 @@
             
             .animation-container {
                 height: 200px;
+            }
+        }
+
+        /* iOS-specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            /* iOS-specific styles */
+            body {
+                -webkit-font-smoothing: antialiased;
+            }
+            
+            .btn, .form-control, .nav-tab {
+                -webkit-appearance: none;
+            }
+            
+            .modal {
+                -webkit-overflow-scrolling: touch;
             }
         }
     </style>
@@ -1193,10 +1233,10 @@
                 <input type="file" id="screenshot" accept="image/*" style="display: none;">
                 <button class="btn btn-secondary" id="upload-btn">Upload Receipt</button>
                 <div id="screenshot-preview" style="margin-top: 10px;"></div>
-                <div id="screenshot-error" class="error message" style="display: none;">Please upload a valid receipt</div>
+                <div id="screenshot-error" class="error-message" style="display: none;">Please upload a valid receipt</div>
             </div>
             
-            <div id="payment-success" class="success message" style="display: none;">
+            <div id="payment-success" class="success-message" style="display: none;">
                 Payment submitted successfully! Your Booking ID is: <strong id="booking-id-display"></strong><br>
                 Use this ID to download your ticket after admin approval.
             </div>
@@ -1685,6 +1725,7 @@
                     // Validate file type
                     if (!file.type.match('image.*')) {
                         document.getElementById('screenshot-error').style.display = 'block';
+                        document.getElementById('screenshot-error').textContent = 'Please upload a valid image file';
                         return;
                     }
                     
