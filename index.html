@@ -34,7 +34,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             line-height: 1.6;
-            -webkit-text-size-adjust: 100%; /* Prevent font scaling on iOS */
+            -webkit-text-size-adjust: 100%;
         }
 
         /* Intro Screen */
@@ -499,6 +499,7 @@
             margin: 20px 0;
             width: 100%;
             overflow: hidden;
+            position: relative;
         }
 
         .barcode {
@@ -512,6 +513,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .watermark-img {
+            max-width: 200px;
+            max-height: 200px;
         }
 
         /* Modals */
@@ -701,6 +718,7 @@
             border: 1px solid var(--glass-border);
             width: 100%;
             box-sizing: border-box;
+            position: relative;
         }
 
         .receipt-header {
@@ -956,6 +974,7 @@
             }
             
             .btn, .form-control, .nav-tab {
+                appearance: none;
                 -webkit-appearance: none;
             }
             
@@ -1014,6 +1033,7 @@
                     <div class="event-type">
                         <div class="event-type-btn active" data-type="gaming">Gaming</div>
                         <div class="event-type-btn" data-type="football">Football Match</div>
+                        <div class="event-type-btn" data-type="Events">Events</div>
                     </div>
                     
                     <div id="gaming-content">
@@ -1264,6 +1284,9 @@
                 
                 <div class="barcode-container">
                     <svg id="receipt-barcode"></svg>
+                    <div class="watermark" id="receipt-watermark" style="display: none;">
+                        <img src="https://i.pinimg.com/736x/65/e3/2f/65e32ff8ae83fa319c670d3a7e6c179c.jpg" class="watermark-img" alt="Approved Watermark">
+                    </div>
                 </div>
                 
                 <table class="receipt-items">
@@ -1354,7 +1377,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="event-price">Price (₵)</label>
+                    <label class="form-label" for="event-price">Base Price (₵)</label>
                     <input type="number" class="form-control" id="event-price" min="1" required>
                 </div>
                 
@@ -1363,6 +1386,14 @@
                     <select class="form-control" id="event-type" required>
                         <option value="gaming">Gaming</option>
                         <option value="football">Football</option>
+                        <option value="Events">Events</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="event-package">Select Package</label>
+                    <select class="form-control" id="event-package" required>
+                        <!-- Packages will be loaded dynamically -->
                     </select>
                 </div>
                 
@@ -1403,6 +1434,7 @@
                     <select class="form-control" id="package-type" required>
                         <option value="gaming">Gaming</option>
                         <option value="football">Football</option>
+                        <option value="Events">Events</option>
                     </select>
                 </div>
                 
@@ -1434,7 +1466,8 @@
                 date: '2024-03-15',
                 price: 50,
                 description: 'Compete in our annual FIFA gaming tournament with amazing prizes!',
-                type: 'gaming'
+                type: 'gaming',
+                packageId: 'pkg1'
             },
             {
                 id: 'evt2',
@@ -1442,7 +1475,8 @@
                 date: '2024-05-28',
                 price: 30,
                 description: 'Watch the Champions League final on our big screens with fellow fans!',
-                type: 'football'
+                type: 'football',
+                packageId: 'pkg4'
             }
         ];
         
@@ -1661,7 +1695,8 @@
             const packageSelect = document.getElementById('package');
             const quantityInput = document.getElementById('quantity');
             
-            const updatePrice = () => {
+            // Update price function
+            window.updatePrice = () => {
                 const selectedPackageId = packageSelect.value;
                 const selectedPackage = packages.find(pkg => pkg.id === selectedPackageId);
                 
@@ -1899,6 +1934,14 @@
             } else {
                 statusCell.classList.add('badge-used');
                 statusCell.textContent = 'Used';
+            }
+            
+            // Show watermark if booking is paid or used
+            const watermark = document.getElementById('receipt-watermark');
+            if (booking.status === 'paid' || booking.status === 'used') {
+                watermark.style.display = 'block';
+            } else {
+                watermark.style.display = 'none';
             }
             
             // Generate barcode
@@ -2178,11 +2221,16 @@
                     day: 'numeric'
                 });
                 
+                // Get package name
+                const package = packages.find(p => p.id === event.packageId);
+                const packageName = package ? package.name : 'Unknown Package';
+                
                 html += `
                     <div class="event-card">
                         <h3 class="event-title">${event.title}</h3>
                         <p class="event-date">${eventDate}</p>
                         <p>${event.description}</p>
+                        <p><strong>Package:</strong> ${packageName}</p>
                         <p class="event-price">₵${event.price}</p>
                         <div class="action-buttons" style="margin-top: 10px;">
                             <button class="btn btn-secondary action-btn edit-event" data-id="${event.id}">Edit</button>
@@ -2303,11 +2351,16 @@
                     day: 'numeric'
                 });
                 
+                // Get package name
+                const package = packages.find(p => p.id === event.packageId);
+                const packageName = package ? package.name : 'Unknown Package';
+                
                 html += `
                     <div class="event-card" data-event-id="${event.id}">
                         <h3 class="event-title">${event.title}</h3>
                         <p class="event-date">${eventDate}</p>
                         <p>${event.description}</p>
+                        <p><strong>Package:</strong> ${packageName}</p>
                         <p class="event-price">₵${event.price}</p>
                         <button class="btn btn-primary book-event-btn" data-event-id="${event.id}" style="margin-top: 10px;">Book Now</button>
                     </div>
@@ -2348,8 +2401,15 @@
             document.getElementById('gaming-content').style.display = event.type === 'gaming' ? 'block' : 'none';
             document.getElementById('football-content').style.display = event.type === 'football' ? 'block' : 'none';
             
-            // Update packages based on event type
+            // Update packages based on event type and select the package associated with the event
             loadPackagesForBooking(event.type);
+            
+            // Set the package to the one associated with the event
+            const packageSelect = document.getElementById('package');
+            packageSelect.value = event.packageId;
+            
+            // Update the price
+            updatePrice();
             
             alert(`Ready to book "${event.title}"! Fill in your details and complete the booking.`);
         }
@@ -2367,6 +2427,10 @@
                 currentEditingEventId = null;
                 document.getElementById('add-event-form').reset();
                 document.getElementById('add-event-modal-title').textContent = 'Add New Event';
+                
+                // Load packages for event type selection
+                loadPackagesForEventModal();
+                
                 addEventModal.classList.add('active');
             });
             
@@ -2384,9 +2448,10 @@
                 const date = document.getElementById('event-date').value;
                 const price = parseInt(document.getElementById('event-price').value);
                 const type = document.getElementById('event-type').value;
+                const packageId = document.getElementById('event-package').value;
                 const description = document.getElementById('event-description').value;
                 
-                if (!title || !date || !price || !description) {
+                if (!title || !date || !price || !description || !packageId) {
                     alert('Please fill in all fields');
                     return;
                 }
@@ -2401,6 +2466,7 @@
                             date,
                             price,
                             type,
+                            packageId,
                             description
                         };
                     }
@@ -2415,6 +2481,7 @@
                         date: date,
                         price: price,
                         type: type,
+                        packageId: packageId,
                         description: description
                     };
                     
@@ -2436,6 +2503,19 @@
             });
         }
 
+        // Load packages for event modal
+        function loadPackagesForEventModal() {
+            const packageSelect = document.getElementById('event-package');
+            packageSelect.innerHTML = '';
+            
+            packages.forEach(pkg => {
+                const option = document.createElement('option');
+                option.value = pkg.id;
+                option.textContent = `${pkg.name} - ₵${pkg.price}`;
+                packageSelect.appendChild(option);
+            });
+        }
+
         // Edit event
         function editEvent(eventId) {
             const event = events.find(e => e.id === eventId);
@@ -2451,7 +2531,11 @@
             document.getElementById('event-date').value = event.date;
             document.getElementById('event-price').value = event.price;
             document.getElementById('event-type').value = event.type;
+            document.getElementById('event-package').value = event.packageId;
             document.getElementById('event-description').value = event.description;
+            
+            // Load packages for event type selection
+            loadPackagesForEventModal();
             
             // Update modal title
             document.getElementById('add-event-modal-title').textContent = 'Edit Event';
