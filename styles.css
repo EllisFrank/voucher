@@ -199,17 +199,17 @@ body {
 }
 
 .nav-tab {
-    flex: 1;
+    flex: none;
     text-align: center;
-    padding: clamp(10px, 3vw, 12px) clamp(12px, 3vw, 16px);
+    padding: clamp(8px, 2.5vw, 10px) clamp(12px, 3vw, 16px);
     border-radius: 12px;
     cursor: pointer;
     white-space: nowrap;
     transition: var(--transition);
-    color: rgba(255, 255, 255, 0.9);
-    min-width: 100px;
-    font-size: clamp(0.8rem, 3vw, 1rem);
-    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
+    min-width: 120px;
+    font-size: clamp(0.85rem, 2.6vw, 1rem);
+    font-weight: 600;
 }
 
 .nav-tab.active {
@@ -230,6 +230,9 @@ body {
     transition: var(--transition);
     width: 100%;
     box-sizing: border-box;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .card:hover {
@@ -343,6 +346,14 @@ body {
 .form-group {
     margin-bottom: 20px;
     width: 100%;
+}
+
+/* Ensure inputs inside settings & forms fill available width */
+.settings-section .form-control,
+.card .form-control,
+.form-group .form-control {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .form-label {
@@ -999,3 +1010,19 @@ select.form-control {
 @media (max-width: 768px) {
     .settings-grid { grid-template-columns: 1fr; }
 }
+
+/* Center header content and keep nav aligned */
+.header {
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.nav-tabs {
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Tighter spacing for action buttons to avoid scattered layout */
+.action-buttons { gap: 8px; }
+
+/* Make modals slightly wider on desktop for readability */
+.modal { max-width: 720px; }
