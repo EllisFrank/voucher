@@ -110,7 +110,7 @@
             <div id="admin-login">
                 <div class="form-group">
                     <input type="password" id="admin-password" placeholder="Admin Password" class="form-control">
-                    <button onclick="adminLogin()" class="btn btn-primary">Login</button>
+                    <button id="login-btn" class="btn btn-primary">Login</button>
                 </div>
             </div>
             <div id="admin-dashboard" style="display: none;">
@@ -118,11 +118,68 @@
                     <button onclick="showAdminTab('bookings')" class="btn btn-secondary">View Bookings</button>
                     <button onclick="showAdminTab('events')" class="btn btn-secondary">Manage Events</button>
                     <button onclick="showAdminTab('packages')" class="btn btn-secondary">Manage Packages</button>
+                    <button onclick="showAdminTab('settings')" class="btn btn-secondary">Settings</button>
                     <button onclick="adminLogout()" class="btn btn-danger">Logout</button>
                 </div>
                 <div id="bookings-admin" style="display: block;"></div>
                 <div id="events-admin" style="display: none;"></div>
                 <div id="packages-admin" style="display: none;"></div>
+                <div id="settings-admin" style="display: none;">
+                    <div class="card-title">System Settings</div>
+                    <div class="settings-grid">
+                        <div class="settings-section">
+                            <h4>ArkaSel API</h4>
+                            <div class="form-group">
+                                <label>Base URL</label>
+                                <input type="text" id="arkasel-base-url" class="form-control" placeholder="https://api.arkasel.com">
+                            </div>
+                            <div class="form-group">
+                                <label>API Key</label>
+                                <input type="text" id="arkasel-api-key" class="form-control" placeholder="Your ArkaSel API Key">
+                            </div>
+                            <div class="form-group">
+                                <label>Merchant ID</label>
+                                <input type="text" id="arkasel-merchant-id" class="form-control" placeholder="Merchant ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Secret</label>
+                                <input type="text" id="arkasel-secret" class="form-control" placeholder="Secret">
+                            </div>
+                            <div class="form-group">
+                                <button onclick="testArkasel()" class="btn btn-ghost">Test ArkaSel</button>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <h4>Paystack API</h4>
+                            <div class="form-group">
+                                <label>Public Key</label>
+                                <input type="text" id="paystack-public-key" class="form-control" placeholder="pk_test_xxx">
+                            </div>
+                            <div class="form-group">
+                                <label>Secret Key</label>
+                                <input type="text" id="paystack-secret-key" class="form-control" placeholder="sk_test_xxx">
+                            </div>
+                            <div class="form-group">
+                                <label>Callback URL</label>
+                                <input type="text" id="paystack-callback-url" class="form-control" placeholder="https://yourdomain.com/callback">
+                            </div>
+                            <div class="form-group">
+                                <label>Environment</label>
+                                <select id="paystack-env" class="form-control">
+                                    <option value="test">Test</option>
+                                    <option value="live">Live</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <button onclick="testPaystack()" class="btn btn-ghost">Test Paystack</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:1rem;">
+                        <button onclick="saveSettings()" class="btn btn-primary">Save Settings</button>
+                        <span id="settings-status" style="margin-left:1rem;color:var(--light)"></span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

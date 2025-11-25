@@ -973,3 +973,29 @@ select.form-control {
         -webkit-overflow-scrolling: touch;
     }
 }
+
+/* Settings page layout */
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+.settings-section {
+    background: var(--glass);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+.settings-section h4 {
+    margin: 0 0 0.5rem 0;
+}
+.btn-ghost {
+    background: transparent;
+    border: 1px dashed rgba(255,255,255,0.08);
+    color: var(--light);
+}
+.settings-grid .form-group { margin-bottom: 0.75rem; }
+
+@media (max-width: 768px) {
+    .settings-grid { grid-template-columns: 1fr; }
+}

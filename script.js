@@ -165,6 +165,9 @@ function initializeApp() {
     
     // Load packages for booking form
     loadPackagesForBooking();
+
+    // Load saved system settings (API keys, endpoints)
+    loadSettings();
     
     // Update admin dashboard if already logged in
     if (localStorage.getItem('adminLoggedIn') === 'true') {
@@ -1290,3 +1293,133 @@ function editPackage(packageId) {
     // Show modal
     document.getElementById('add-package-modal').classList.add('active');
 }
+
+// --- Admin helpers: tabs, login/logout, and settings ---
+
+function showAdminTab(tab) {
+    const tabs = ['bookings', 'events', 'packages', 'settings'];
+    tabs.forEach(t => {
+        const el = document.getElementById(`${t}-admin`);
+        if (el) el.style.display = (t === tab) ? 'block' : 'none';
+    });
+
+    // If switching to bookings or other sections, refresh content
+    if (tab === 'bookings') updateAdminDashboard();
+    if (tab === 'events') loadEvents();
+    if (tab === 'packages') updatePackagesAdmin && updatePackagesAdmin();
+}
+
+function adminLogin() {
+    const password = document.getElementById('admin-password').value;
+    if (password === 'admin123') {
+        document.getElementById('admin-login').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'block';
+        localStorage.setItem('adminLoggedIn', 'true');
+        updateAdminDashboard();
+    } else {
+        alert('Incorrect password!');
+    }
+}
+
+function adminLogout() {
+    localStorage.removeItem('adminLoggedIn');
+    document.getElementById('admin-dashboard').style.display = 'none';
+    document.getElementById('admin-login').style.display = 'block';
+}
+
+// Settings storage format saved under 'swanzySettings'
+function saveSettings() {
+    const settings = {
+        arkasel: {
+            baseUrl: document.getElementById('arkasel-base-url').value.trim(),
+            apiKey: document.getElementById('arkasel-api-key').value.trim(),
+            merchantId: document.getElementById('arkasel-merchant-id').value.trim(),
+            secret: document.getElementById('arkasel-secret').value.trim()
+        },
+        paystack: {
+            publicKey: document.getElementById('paystack-public-key').value.trim(),
+            secretKey: document.getElementById('paystack-secret-key').value.trim(),
+            callbackUrl: document.getElementById('paystack-callback-url').value.trim(),
+            env: document.getElementById('paystack-env').value
+        }
+    };
+
+    localStorage.setItem('swanzySettings', JSON.stringify(settings));
+    const status = document.getElementById('settings-status');
+    if (status) {
+        status.textContent = 'Settings saved';
+        setTimeout(() => { status.textContent = ''; }, 3000);
+    }
+}
+
+function loadSettings() {
+    const raw = localStorage.getItem('swanzySettings');
+    if (!raw) return;
+    let settings = {};
+    try {
+        settings = JSON.parse(raw);
+    } catch (e) {
+        console.warn('Failed to parse settings:', e);
+        return;
+    }
+
+    if (settings.arkasel) {
+        document.getElementById('arkasel-base-url').value = settings.arkasel.baseUrl || '';
+        document.getElementById('arkasel-api-key').value = settings.arkasel.apiKey || '';
+        document.getElementById('arkasel-merchant-id').value = settings.arkasel.merchantId || '';
+        document.getElementById('arkasel-secret').value = settings.arkasel.secret || '';
+    }
+
+    if (settings.paystack) {
+        document.getElementById('paystack-public-key').value = settings.paystack.publicKey || '';
+        document.getElementById('paystack-secret-key').value = settings.paystack.secretKey || '';
+        document.getElementById('paystack-callback-url').value = settings.paystack.callbackUrl || '';
+        document.getElementById('paystack-env').value = settings.paystack.env || 'test';
+    }
+}
+
+function testArkasel() {
+    const baseUrl = document.getElementById('arkasel-base-url').value.trim();
+    const apiKey = document.getElementById('arkasel-api-key').value.trim();
+    if (!baseUrl || !apiKey) {
+        alert('Please provide ArkaSel base URL and API key to test.');
+        return;
+    }
+
+    // Basic test: try a GET to the base URL (no assumptions about endpoints)
+    fetch(baseUrl, { method: 'GET' })
+        .then(res => {
+            if (res.ok) {
+                alert('ArkaSel base URL is reachable (HTTP ' + res.status + ').');
+            } else {
+                alert('ArkaSel responded with HTTP ' + res.status + '.');
+            }
+        })
+        .catch(err => {
+            console.warn(err);
+            alert('Could not reach ArkaSel base URL. Check the URL and network.');
+        });
+}
+
+function testPaystack() {
+    const pub = document.getElementById('paystack-public-key').value.trim();
+    const sk = document.getElementById('paystack-secret-key').value.trim();
+    if (!pub || !sk) {
+        alert('Please provide Paystack public and secret keys to test.');
+        return;
+    }
+
+    // Basic validation only: check keys look like keys
+    const ok = (pub.startsWith('pk_') || pub.startsWith('PUBLISHABLE_') || pub.length > 10) && (sk.startsWith('sk_') || sk.length > 10);
+    if (ok) {
+        alert('Paystack keys look valid (basic check).');
+    } else {
+        alert('Paystack keys may be invalid. Please verify them.');
+    }
+}
+
+// Ensure the login button added to the DOM is wired (for the recreated HTML)
+document.addEventListener('DOMContentLoaded', function() {
+    const loginBtn = document.getElementById('login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', adminLogin);
+});
